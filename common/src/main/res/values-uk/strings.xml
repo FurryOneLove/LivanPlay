@@ -78,7 +78,6 @@
     <string name="resolution_handshake_prefix">Роздільна здатність узгодження:\u0020</string>
     <string name="safe_area_full_screen_at">Безпечна область: увесь екран,\u0020</string>
     <string name="safe_area_mapping_summary">Безпечна область: %1$d x %2$d у точці (%3$d, %4$d) на екрані %5$d x %6$d</string>
-    <string name="settings_android9_compat">Наведені нижче налаштування недоступні та приховані в Android 9 (API 28):\n• Wi-Fi P2P (5 ГГц) — натомість використовується LocalOnlyHotspot.\n• Програмний декодер HEVC — натомість використовується апаратне декодування.</string>
     <string name="settings_mfi_address_hint">Адреса має починатися з http:// або https://. Токен необов’язковий і надсилається як токен авторизації Bearer.</string>
     <string name="app_name">LivanPlay</string>
     <string name="language_section_title">Мова</string>
@@ -101,7 +100,6 @@
     <string name="allow_precise_location_for_diplay_in_the_head_unit_s_app_p">Дозвольте LivanPlay доступ до точного місцезнаходження в налаштуваннях дозволів застосунку на головному пристрої.</string>
     <string name="allow_the_connection_permission_to_continue">Надайте дозвіл на підключення, щоб продовжити</string>
     <string name="an_independent_carplay_receiver_for_android_head_units_wir">Незалежний приймач CarPlay для головних пристроїв Android. Дротове й бездротове підключення працюють на головному пристрої з локальною автентифікацією. Звичайний iPhone може підключитися без джейлбрейка, Mac, адаптера чи входу в обліковий запис.\n\nУ цій попередній версії використовується експериментальна ідентичність аксесуара. Сумісність з усіма iPhone та головними пристроями ще перевіряється. Цей продукт не сертифіковано Apple.</string>
-    <string name="android_9_compatibility">Сумісність з Android 9</string>
     <string name="app_permissions">Дозволи застосунку</string>
     <string name="app_settings">Налаштування застосунку</string>
     <string name="apply_and_reconnect">Застосувати й перепідключитися</string>
@@ -456,11 +454,6 @@
     <string name="carplay_dock_hint">Де CarPlay показує програми, годинник і стан. Між «З боку водія» і «Знизу» перемикається одразу; «Автоматично» залишає вибір iPhone і діє після перепідключення.</string>
     <string name="split_screen_areas">CarPlay у розділеному екрані</string>
     <string name="split_screen_areas_description">Коли головний пристрій показує LivanPlay у розділеному екрані, CarPlay перемальовується під це вікно, а не зменшується з чорними смугами, і повертається на весь екран без перепідключення. Розмір вікна запам’ятовується першого разу, тож з наступного підключення картинка точно за розміром. Якщо панель програм на «Автоматично», CarPlay тоді ставить її знизу. Застосовується з наступного підключення.</string>
-    <string name="carplay_rotation">Повертати CarPlay разом з екраном без перепідключення</string>
-    <string name="carplay_rotation_description">Для головних пристроїв, у яких екран повертається. CarPlay отримує квадратну картинку з горизонтальним і вертикальним екраном, тож поворот екрана перемальовує CarPlay замість перепідключення. Більший квадрат може збільшити навантаження під час обробки відео та знизити плавність, особливо з «Чіткіше» на великому екрані. Якщо ви рідко повертаєте екран, вимкнення цього параметра може допомогти. Власна безпечна зона до квадратної картинки не застосовується. Застосовується з наступного підключення.</string>
-    <string name="carplay_rotation_picture">Квадратна картинка</string>
-    <string name="carplay_rotation_smoother">Плавніше (1920)</string>
-    <string name="carplay_rotation_sharper">Чіткіше (розмір екрана)</string>
     <string name="side_panel">Бічна панель поруч із CarPlay (експериментально)</string>
     <string name="side_panel_description">CarPlay може переходити на дві третини екрана, а LivanPlay показує в решті свою панель: з боку пасажира на горизонтальному екрані, знизу на вертикальному (годинник і заряд, якщо його зчитано). Показуйте й ховайте її з меню під час сесії. Застосовується з наступного підключення.</string>
     <string name="side_panel_show">Бічна панель</string>

@@ -41,7 +41,6 @@ The guides under `docs/` come from DiPlay and still describe it; the connection,
 
 - [Install and connect](docs/INSTALL.md)
 - [Existing Wi-Fi / Same LAN](docs/EXISTING_WIFI.md)
-- [Automatic joining of a CarPlay hotspot](docs/WIRELESS_HOTSPOT_JOIN.md)
 - [Privacy and diagnostic reports](docs/PRIVACY.md)
 - [Credits and licenses](docs/THIRD_PARTY_NOTICES.md)
 

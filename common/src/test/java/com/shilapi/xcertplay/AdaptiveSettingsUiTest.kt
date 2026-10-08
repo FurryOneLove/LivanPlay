@@ -517,7 +517,7 @@ class AdaptiveSettingsUiTest {
         assertFalse(vehicle.any { it.startsWith(text(R.string.settings_app_appearance)) })
         assertFalse(advanced.any { it.startsWith(text(R.string.settings_app_appearance)) })
         listOf(R.string.main_buffered_audio, R.string.efficient_video, R.string.smooth_video, R.string.call_echo_cancellation, R.string.call_voice_filter, R.string.right_hand_drive, R.string.car_button_in_carplay,
-            R.string.side_panel, R.string.split_screen_areas, R.string.carplay_rotation).forEach {
+            R.string.side_panel, R.string.split_screen_areas).forEach {
             assertFalse(text(it), text(it) in display)
         }
     }

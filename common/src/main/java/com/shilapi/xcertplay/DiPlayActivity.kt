@@ -132,7 +132,6 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
     private var setupFromSettings = false
     private var settingsSectionFilter: Set<SettingsSection>? = null
     private var pendingCarHotspotSetup = false
-    private var hotspotJoinControls: HotspotJoinControls? = null
     private var setupError: String? = null
     private var status: TextView? = null
     private var connectButton: Button? = null
@@ -413,7 +412,6 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
         appearanceObserverRemoval?.invoke()
         appearanceObserverRemoval = null
         handler.removeCallbacks(appearancePoll)
-        hotspotJoinControls?.close()
         cancelUsbPermissionSetup()
         cancelKeyLearning()
         super.onDestroy()
@@ -1501,25 +1499,9 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
                 SplitScreenSettings.setEnabled(this, it)
                 markReconnectNeeded()
             }
-            toggle(card, getString(R.string.carplay_rotation), getString(R.string.carplay_rotation_description),
-                CarPlayRotation.enabled(this)) {
-                CarPlayRotation.setEnabled(this, it)
-                render()
-                markReconnectNeeded()
-            }
             toggle(card, getString(R.string.side_panel), getString(R.string.side_panel_description), SidePanelSettings.enabled(this)) {
                 SidePanelSettings.setEnabled(this, it)
                 markReconnectNeeded()
-            }
-            if (CarPlayRotation.enabled(this)) {
-                val pictures = CarPlayRotation.Picture.entries
-                choice(card, getString(R.string.carplay_rotation_picture), listOf(
-                    getString(R.string.carplay_rotation_smoother),
-                    getString(R.string.carplay_rotation_sharper),
-                ), pictures.indexOf(CarPlayRotation.picture(this)), reconnects = false) {
-                    CarPlayRotation.setPicture(this, pictures[it])
-                    markReconnectNeeded()
-                }
             }
         }
         // Opt-in controls that can cost sound or video on some head units.
@@ -2109,11 +2091,6 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
                 }
             }, matchButton(12, 60))
             parent.addView(label(if (pendingCarHotspotSetup) getString(R.string.finish_setup_save_your_hotspot_details_to_use_this_mode) else if (carHotspotOff()) getString(R.string.hotspot_details_off) else getString(R.string.hotspot_details_saved), 15, if (carHotspotOff()) WARNING else MUTED).apply { setPadding(0, dp(12), 0, 0) })
-            val join = hotspotJoinControls ?: HotspotJoinControls(this,
-                { CarPlayBackgroundSession.hasSession() }, beforeAction = { startupHotspotCancelled = true },
-                labelFactory = { label(it, 15, MUTED) }, buttonFactory = { title, click -> button(title, false, click) })
-                .also { hotspotJoinControls = it }
-            parent.addView(join.build())
         } else if (mode == WirelessHotspotMode.EXISTING_WIFI) {
             parent.addView(label(getString(R.string.existing_wifi_instructions), 16, MUTED))
             parent.addView(button(getString(R.string.open_car_wi_fi_settings), false) { openCarClientWifiSettings() }, matchButton(12, 60))

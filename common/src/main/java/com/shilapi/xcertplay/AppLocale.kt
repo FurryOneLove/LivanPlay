@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
 import com.shilapi.xcertplay.host.R
+import com.shilapi.xcertplay.platform.VehiclePlatform
 import java.util.Locale
 
 /** Platform app locales on Android 13+, with a persisted context override on older Android. */
@@ -29,6 +30,13 @@ object AppLocale {
 
     private const val KEY_MIGRATED = "app_language_platform_migrated"
 
+    /**
+     * The language before the driver picks one. IHU601/IHU602 head units run with an English
+     * system language in Russian-market cars, so "system default" there would mean English.
+     */
+    fun defaultLanguage(ecarxIhu: Boolean = VehiclePlatform.isEcarxIhu): String =
+        if (ecarxIhu) RUSSIAN else SYSTEM
+
     fun preference(context: Context): String {
         if (Build.VERSION.SDK_INT >= 33) {
             val locales = context.getSystemService(LocaleManager::class.java).applicationLocales
@@ -47,7 +55,7 @@ object AppLocale {
             }
         }
         return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getString(KEY_LANGUAGE, SYSTEM)?.takeIf { it in ALL } ?: SYSTEM
+            .getString(KEY_LANGUAGE, null)?.takeIf { it in ALL } ?: defaultLanguage()
     }
 
     fun save(context: Context, language: String) {

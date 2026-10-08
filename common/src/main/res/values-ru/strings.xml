@@ -76,7 +76,6 @@
     <string name="audio_stream_unavailable">Тип потока %1$d недоступен здесь (состояние=%2$s)</string>
     <string name="resolution_handshake_prefix">Разрешение рукопожатия:\u0020</string>
     <string name="safe_area_full_screen_at">Безопасная область: полный экран \u0020</string>
-    <string name="settings_android9_compat">Следующие настройки недоступны и скрыты на Android 9 (API 28):\n• Wi-Fi P2P (5 ГГц) — вместо него используется LocalOnlyHotspot.\n• Программный декодер HEVC — вместо него используется аппаратное декодирование.</string>
     <string name="settings_mfi_address_hint">Адрес должен начинаться с http:// или https://. Токен необязателен и отправляется как Authorization bearer token.</string>
     <string name="language_section_title">Язык</string>
     <string name="language_app_language">Язык приложения</string>
@@ -98,7 +97,6 @@
     <string name="allow_precise_location_for_diplay_in_the_head_unit_s_app_p">Разрешите точное «Местоположение» для LivanPlay в разрешениях приложения головного устройства.</string>
     <string name="allow_the_connection_permission_to_continue">Разрешите подключение, чтобы продолжить</string>
     <string name="an_independent_carplay_receiver_for_android_head_units_wir">Независимый приёмник CarPlay для головных устройств Android. Проводные и беспроводные подключения работают на головном устройстве с локальной аутентификацией. Обычный iPhone может подключиться без джейлбрейка, Mac, переходника или входа в учётную запись.\n\nВ этой предварительной версии используется экспериментальная аксессуарная идентичность. Совместимость со всеми iPhone и головными устройствами ещё тестируется. Продукт не сертифицирован Apple.</string>
-    <string name="android_9_compatibility">Совместимость с Android 9</string>
     <string name="app_permissions">Разрешения приложения</string>
     <string name="app_settings">Настройки приложения</string>
     <string name="apply_and_reconnect">Применить и переподключиться</string>
@@ -444,11 +442,6 @@
     <string name="carplay_dock_hint">Где CarPlay показывает приложения, часы и состояние. Между «Со стороны водителя» и «Снизу» переключается сразу; «Автоматически» оставляет выбор iPhone и действует после переподключения.</string>
     <string name="split_screen_areas">CarPlay в разделённом экране</string>
     <string name="split_screen_areas_description">Когда головное устройство показывает LivanPlay в разделённом экране, CarPlay перерисовывается под это окно, а не уменьшается с чёрными полосами, и возвращается на весь экран без переподключения. Размер окна запоминается в первый раз, поэтому со следующего подключения картинка точно по размеру. Если панель приложений на «Автоматически», CarPlay тогда ставит её снизу. Применяется со следующего подключения.</string>
-    <string name="carplay_rotation">Поворачивать CarPlay вместе с экраном без переподключения</string>
-    <string name="carplay_rotation_description">Для головных устройств, у которых экран поворачивается. CarPlay получает квадратную картинку с горизонтальным и вертикальным экраном, поэтому поворот экрана перерисовывает CarPlay вместо переподключения. Более крупный квадрат может увеличить нагрузку при обработке видео и снизить плавность, особенно с «Чётче» на большом экране. Если вы редко поворачиваете экран, отключение этого параметра может помочь. Своя безопасная зона к квадратной картинке не применяется. Применяется со следующего подключения.</string>
-    <string name="carplay_rotation_picture">Квадратная картинка</string>
-    <string name="carplay_rotation_smoother">Плавнее (1920)</string>
-    <string name="carplay_rotation_sharper">Чётче (размер экрана)</string>
     <string name="side_panel">Боковая панель рядом с CarPlay (экспериментально)</string>
     <string name="side_panel_description">CarPlay может переходить на две трети экрана, а LivanPlay показывает в остальной части свою панель: со стороны пассажира на горизонтальном экране, снизу на вертикальном (часы и заряд, если он считан). Показывайте и скрывайте её из меню во время сеанса. Применяется со следующего подключения.</string>
     <string name="side_panel_show">Боковая панель</string>
@@ -497,4 +490,28 @@
     <string name="setup_badge_adb">Требуется ADB по сети</string>
     <string name="setup_done_title">Всё готово</string>
     <string name="setup_done_description">Подключите iPhone сейчас. Этот мастер можно снова открыть в настройках.</string>
+    <string name="usb_auto_confirm_title">Автоподтверждение доступа к USB</string>
+    <string name="usb_auto_confirm_subtitle">Автоматически принимать запрос Android на доступ к USB, когда iPhone подключён кабелем (нужна служба специальных возможностей)</string>
+    <string name="usb_auto_confirm_desc">Сам отмечает «Всегда разрешать» и подтверждает запрос Android на доступ к USB-аксессуару для CarPlay</string>
+    <string name="usb_auto_confirm_status_on">Автоподтверждение USB: включено</string>
+    <string name="usb_auto_confirm_dialog_msg">Для автоподтверждения нужна служба специальных возможностей. На многих головных устройствах её нельзя включить из системных настроек.\n\nЗаодно будет запрошено разрешение показывать окна поверх других приложений — оно нужно, чтобы приложение открывалось само после запуска автомобиля. Уже включённые службы специальных возможностей сохранятся.\n\nВыдать эти два разрешения через локальный ADB?</string>
+    <string name="usb_auto_confirm_active_hint">✓ Служба специальных возможностей работает (запрос USB подтверждается автоматически)</string>
+    <string name="btn_auto_apply_permissions">Настроить разрешения USB</string>
+    <string name="btn_permissions_ready">Разрешения USB и показа поверх окон проверены ✓</string>
+    <string name="auto_grant_title">Настраиваю разрешения через локальный ADB…</string>
+    <string name="auto_grant_msg">Запрашиваю через локальный ADB службу специальных возможностей для USB и разрешение показывать окна поверх других приложений. Если появится системный запрос отладки, подтвердите его. Отмена останавливает дальнейшие запросы; уже выданные разрешения остаются.</string>
+    <string name="auto_grant_success_title">Разрешения выданы</string>
+    <string name="auto_grant_success_msg">Настроено:\n✓ Служба специальных возможностей (автоподтверждение USB)\n✓ Показ поверх других приложений</string>
+    <string name="auto_grant_confirm_title">Подтвердите ADB на экране</string>
+    <string name="auto_grant_confirm_msg">Доступ по ADB ещё не подтверждён. Если на экране появился запрос «Разрешить отладку по USB?», подтвердите его.\n\nОтметьте «Всегда разрешать» и нажмите «ОК», затем нажмите эту кнопку ещё раз, чтобы завершить настройку.</string>
+    <string name="retry_auto_grant">Повторить выдачу разрешений</string>
+    <string name="manual_grant_reason_adboff">Локальный ADB (порт 5555) на этом головном устройстве не работает.\nМожно включить службу специальных возможностей вручную в системных настройках или включить ADB по сети.</string>
+    <string name="btn_open_accessibility_setting">Открыть системные настройки специальных возможностей</string>
+    <string name="btn_open_overlay_setting">Открыть системные настройки показа поверх окон</string>
+    <string name="manual_grant_cmd_hint">Или выполните эту команду ADB с компьютера:</string>
+    <string name="hotspot_network_not_ready">Сеть точки доступа не готова</string>
+    <string name="first_tcp_timeout">iPhone не подключился к CarPlay вовремя</string>
+    <string name="wireless_startup_retries_exhausted">Автоматические попытки прекращены. Проверьте подключение и повторите вручную.</string>
+    <string name="retry_carplay_connection">Повторить подключение</string>
+    <string name="auto_grant_incomplete">Не все запрошенные разрешения удалось проверить. Посмотрите состояние каждого ниже; включите ADB по сети и повторите или настройте вручную. Уже выданные разрешения сохранены.</string>
 </resources>

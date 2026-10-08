@@ -61,6 +61,17 @@ class AppLocaleTest {
         assertSame(context, AppLocale.wrap(context))
     }
 
+    @Test fun russianIsTheStartingLanguageOnlyOnTheTargetHeadUnits() {
+        assertEquals(AppLocale.RUSSIAN, AppLocale.defaultLanguage(ecarxIhu = true))
+        assertEquals(AppLocale.SYSTEM, AppLocale.defaultLanguage(ecarxIhu = false))
+    }
+
+    @Test @Config(sdk = [28])
+    fun anExplicitSystemDefaultChoiceIsKeptOnOlderAndroid() {
+        AppLocale.save(context, AppLocale.SYSTEM)
+        assertEquals(AppLocale.SYSTEM, AppLocale.preference(context))
+    }
+
     @Test fun traditionalChineseUsesItsOwnLocaleOnAndroid13() {
         AppLocale.save(context, AppLocale.TRADITIONAL_CHINESE)
         assertEquals("zh-TW", manager.applicationLocales.toLanguageTags())

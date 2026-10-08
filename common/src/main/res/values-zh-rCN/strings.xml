@@ -76,7 +76,6 @@
     <string name="audio_stream_unavailable">流类型 %1$d 在此不可用（状态=%2$s）</string>
     <string name="resolution_handshake_prefix">握手分辨率：</string>
     <string name="safe_area_full_screen_at">安全区域：全屏，</string>
-    <string name="settings_android9_compat">以下设置在 Android 9（API 28）上不可用且已隐藏：\n• Wi-Fi P2P（5 GHz）— 将改用 LocalOnlyHotspot。\n• HEVC 软解码器 — 将改用硬件解码。</string>
     <string name="settings_mfi_address_hint">地址必须以 http:// 或 https:// 开头。令牌为可选项，将作为 Authorization bearer token 发送。</string>
     <string name="a_familiar_drive">熟悉的驾乘体验。</string>
     <string name="a_previous_wi_fi_direct_connection_is_still_running_reset">之前的 Wi-Fi Direct 连接仍在运行。请重置后再连接。</string>
@@ -92,7 +91,6 @@
     <string name="allow_precise_location_for_diplay_in_the_head_unit_s_app_p">请在车机应用权限中允许 LivanPlay 使用精确位置信息。</string>
     <string name="allow_the_connection_permission_to_continue">请授予连接权限以继续</string>
     <string name="an_independent_carplay_receiver_for_android_head_units_wir">面向 Android 车机的独立 CarPlay 接收器。有线和无线连接均在车机上运行，并使用本地认证。普通 iPhone 无需越狱、Mac、转接器或登录即可连接。\n\n此预览版使用实验性配件身份，仍在测试与不同 iPhone 和车机的兼容性。本产品未经 Apple 认证。</string>
-    <string name="android_9_compatibility">Android 9 兼容性</string>
     <string name="app_name">LivanPlay</string>
     <string name="app_permissions">应用权限</string>
     <string name="app_settings">应用设置</string>
@@ -406,12 +404,12 @@
     <string name="usb_auto_confirm_status_on">USB 弹窗自动确认：已开启</string>
     <string name="usb_auto_confirm_dialog_msg">开启自动确认需要无障碍服务支持。许多车机无法直接从系统设置中开启。\n\n此次设置还会申请悬浮窗权限，用于车辆启动后自动打开应用，并保留现有无障碍服务。\n\n是否通过车机本地 ADB 申请这两项权限？</string>
     <string name="usb_auto_confirm_active_hint">✓ 无障碍服务已激活（连接 iPhone 时将自动确认）</string>
-    <string name="btn_auto_apply_permissions">设置 USB 与地图权限</string>
-    <string name="btn_permissions_ready">USB、使用情况与悬浮窗权限已验证 ✓</string>
+    <string name="btn_auto_apply_permissions">设置 USB 权限</string>
+    <string name="btn_permissions_ready">USB 与悬浮窗权限已验证 ✓</string>
     <string name="auto_grant_title">正在通过车载 ADB 自动配置权限...</string>
     <string name="auto_grant_msg">正在通过本地 ADB 申请 USB 无障碍服务和悬浮窗权限。如出现系统调试授权提示，请允许。取消会停止后续申请；已授予的权限仍会保留。</string>
     <string name="auto_grant_success_title">🎉 自动授权成功！</string>
-    <string name="auto_grant_success_msg">已成功自动开启：\n✓ 无障碍服务（USB 弹窗自动确认）\n✓ 桌面与前台感知（离开桌面自动隐藏悬浮地图）\n✓ 悬浮窗显示权限</string>
+    <string name="auto_grant_success_msg">已成功自动开启：\n✓ 无障碍服务（USB 弹窗自动确认）\n✓ 悬浮窗显示权限</string>
     <string name="auto_grant_confirm_title">请确认车机调试授权</string>
     <string name="auto_grant_confirm_msg">尚未确认 ADB 授权。如果车机显示【允许 USB 调试吗？】窗口，请允许。\n\n请在车机弹窗中勾选【一律允许】，并点击【确定】，然后再次点击【一键自动授权】即可完成配置！</string>
     <string name="retry_auto_grant">重试一键授权</string>
@@ -478,11 +476,6 @@
     <string name="carplay_dock_hint">CarPlay 显示应用、时钟和状态的位置。在“驾驶员一侧”和“底部”之间切换立即生效；“自动”由 iPhone 决定，重新连接后生效。</string>
     <string name="split_screen_areas">分屏中的 CarPlay</string>
     <string name="split_screen_areas_description">车机以分屏显示 LivanPlay 时，CarPlay 会按该窗口重新绘制，而不是缩小并留黑边；返回全屏也无需重新连接。首次使用时会记住窗口大小，下次连接起画面完全贴合。程序栏设为“自动”时，CarPlay 会把它放在底部。下次连接时生效。</string>
-    <string name="carplay_rotation">随屏幕旋转 CarPlay，无需重新连接</string>
-    <string name="carplay_rotation_description">适用于屏幕可旋转的车机。CarPlay 会获得包含横屏和竖屏的方形画面，旋转屏幕时直接重新绘制，无需重新连接。更大的方形画面可能增加视频处理负担并降低流畅度，尤其是在大屏上选择“更清晰”时。如果很少旋转屏幕，关闭此选项可能有所帮助。自定义安全区域不适用于方形画面。下次连接时生效。</string>
-    <string name="carplay_rotation_picture">方形画面</string>
-    <string name="carplay_rotation_smoother">更流畅（1920）</string>
-    <string name="carplay_rotation_sharper">更清晰（屏幕尺寸）</string>
     <string name="auto_grant_incomplete">未验证全部请求权限。请检查下方各项状态；开启网络 ADB 后重试，或使用手动设置。现有权限保持不变。</string>
     <string name="side_panel">CarPlay 旁的侧边面板（实验性）</string>
     <string name="side_panel_description">CarPlay 可移到屏幕的三分之二，LivanPlay 在其余部分显示自己的面板：横屏时在乘客一侧，竖屏时在底部（时钟，以及已读取时的电量）。可在会话菜单中显示或隐藏。下次连接时生效。</string>

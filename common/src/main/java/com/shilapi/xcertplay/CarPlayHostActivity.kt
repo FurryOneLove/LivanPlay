@@ -1629,27 +1629,6 @@ class CarPlayHostActivity : ComponentActivity() {
             ).apply { topMargin = dp(12) },
         )
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            content.addView(
-                settingsCategoryHeader(getString(R.string.android_9_compatibility)),
-                LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                ).apply { topMargin = dp(40) },
-            )
-            content.addView(
-                menuText(
-                    getString(R.string.settings_android9_compat),
-                    16f,
-                    MENU_SECONDARY,
-                ),
-                LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                ).apply { topMargin = dp(12) },
-            )
-        }
-
         val preview = menuText("", 17f, MENU_SECONDARY)
         content.addView(
             preview,

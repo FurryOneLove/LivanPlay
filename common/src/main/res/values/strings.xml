@@ -77,7 +77,6 @@
     <string name="resolution_handshake_prefix">Handshake resolution:\u0020</string>
     <string name="safe_area_full_screen_at">Safe area: full screen at\u0020</string>
     <string name="safe_area_mapping_summary">Safe area: %1$d x %2$d at (%3$d, %4$d) in %5$d x %6$d</string>
-    <string name="settings_android9_compat">The following settings are unavailable and hidden on Android 9 (API 28):\n• Wi-Fi P2P (5 GHz) — LocalOnlyHotspot is used instead.\n• HEVC software decoder — hardware decoding is used instead.</string>
     <string name="settings_mfi_address_hint">Address must start with http:// or https://. Token is optional and sent as an Authorization bearer token.</string>
     <string name="app_name">LivanPlay</string>
     <string name="language_section_title">Language</string>
@@ -100,7 +99,6 @@
     <string name="allow_precise_location_for_diplay_in_the_head_unit_s_app_p">Allow precise Location for LivanPlay in the head unit’s app permissions.</string>
     <string name="allow_the_connection_permission_to_continue">Allow the connection permission to continue</string>
     <string name="an_independent_carplay_receiver_for_android_head_units_wir">An independent CarPlay receiver for Android head units. Wired and wireless connections run on the head unit, with local authentication. A standard iPhone can connect without a jailbreak, Mac, dongle or sign-in.\n\nThis preview uses an experimental accessory identity. Compatibility with every iPhone and head unit is still being tested. It is not an Apple-certified product.</string>
-    <string name="android_9_compatibility">Android 9 compatibility</string>
     <string name="app_permissions">App permissions</string>
     <string name="app_settings">App settings</string>
     <string name="apply_and_reconnect">Apply and reconnect</string>
@@ -442,12 +440,12 @@
     <string name="usb_auto_confirm_status_on">USB Dialog Auto-Confirm: Enabled</string>
     <string name="usb_auto_confirm_dialog_msg">Auto-confirm requires the Accessibility Service. Many car head units do not expose the system accessibility settings.\n\nThis setup also requests permission to draw over other apps, which lets the app open itself after the car starts. Existing accessibility services are preserved.\n\nApply these two permissions via local ADB?</string>
     <string name="usb_auto_confirm_active_hint">✓ Accessibility Service is active (USB prompt will be auto-confirmed)</string>
-    <string name="btn_auto_apply_permissions">Set up USB and map permissions</string>
-    <string name="btn_permissions_ready">USB, usage and overlay permissions verified ✓</string>
+    <string name="btn_auto_apply_permissions">Set up USB permissions</string>
+    <string name="btn_permissions_ready">USB and overlay permissions verified ✓</string>
     <string name="auto_grant_title">Configuring Permissions via Local ADB...</string>
     <string name="auto_grant_msg">Requesting USB accessibility and overlay permission via local ADB. Approve the system debugging prompt if shown. Cancel stops further requests; permissions already granted remain enabled.</string>
     <string name="auto_grant_success_title">Auto-Grant Succeeded!</string>
-    <string name="auto_grant_success_msg">Successfully configured:\n✓ Accessibility Service (USB auto-confirm)\n✓ Foreground Sensing (Auto-hide floating map when leaving home)\n✓ System Alert Window</string>
+    <string name="auto_grant_success_msg">Successfully configured:\n✓ Accessibility Service (USB auto-confirm)\n✓ Draw over other apps</string>
     <string name="auto_grant_confirm_title">Please Confirm ADB on Screen</string>
     <string name="auto_grant_confirm_msg">ADB authorization has not been confirmed. If the car shows an \"Allow USB debugging?\" prompt, approve it.\n\nPlease check \"Always allow\" and tap OK, then tap this button again to complete setup!</string>
     <string name="retry_auto_grant">Retry Auto-Grant</string>
@@ -514,11 +512,6 @@
     <string name="carplay_dock_hint">Where CarPlay shows its apps, clock and status. Between Driver\'s side and Bottom it moves at once; Automatic leaves it to the iPhone and applies after a reconnect.</string>
     <string name="split_screen_areas">CarPlay in the head unit\'s split screen</string>
     <string name="split_screen_areas_description">When the head unit shows LivanPlay in split screen, CarPlay redraws for that window instead of shrinking with black bars, and back to full screen without reconnecting. The window\'s size is learned the first time, so the picture fits exactly from the next connection. With the dock on Automatic, CarPlay then puts it at the bottom. Applies at the next connection.</string>
-    <string name="carplay_rotation">Turn CarPlay with the screen without reconnecting</string>
-    <string name="carplay_rotation_description">For head units whose screen turns. CarPlay gets a square picture holding a landscape and a portrait screen, so turning the screen redraws CarPlay instead of reconnecting. A larger square can increase video work and reduce smoothness, especially with Sharper on a large screen. If you rarely turn the screen, leaving this off may help. The custom safe area does not apply to a square picture. Applies at the next connection.</string>
-    <string name="carplay_rotation_picture">Square picture</string>
-    <string name="carplay_rotation_smoother">Smoother (1920)</string>
-    <string name="carplay_rotation_sharper">Sharper (the screen\'s size)</string>
     <string name="auto_grant_incomplete">Setup did not verify every requested permission. Check each status below; enable network ADB and retry, or use the manual setup. Existing permissions are kept.</string>
     <string name="side_panel">Side panel next to CarPlay (experimental)</string>
     <string name="side_panel_description">CarPlay can move to two thirds of the screen while LivanPlay shows a panel in the rest: on the passenger\'s side of a landscape screen, at the bottom of a portrait one (clock and, where it is read, the battery). Show and hide it from the in-session menu. Applies at the next connection.</string>

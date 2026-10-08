@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="contrib_audio_home_channel_preview_unavailable">На этом устройстве нельзя прослушать аудиопоток Android %1$d.</string>
+    <string name="contrib_audio_home_media_channel_label">Аудиопоток музыки</string>
+    <string name="contrib_audio_home_nav_channel_label">Аудиопоток навигации</string>
+    <string name="contrib_audio_home_nav_channel_note">0 — автоматический выбор. Значения 1–20 задают устаревшие номера аудиопотоков, в том числе фирменные выходы головного устройства, если оно их поддерживает. Нажмите на значение, чтобы прослушать. Изменения применяются при переподключении.</string>
+    <string name="contrib_audio_home_toggle_audio_focus">Аудиофокус</string>
+    <string name="contrib_audio_home_toggle_audio_focus_desc">Музыка CarPlay запрашивает аудиофокус. Если при включённой настройке звук пропадает (некоторые головные устройства плохо работают с фокусом), выключите её. Изменения применяются при переподключении.</string>
+    <string name="audio_focus_auto_yield">Приглушать музыку при временной потере фокуса</string>
+    <string name="audio_focus_auto_yield_desc">Когда аудиофокус включён, приглушать музыку на время прерываний звука Android, в том числе звонков, и возвращать звук, когда фокус вернётся. Выключите, если головное устройство не возвращает фокус. Изменения применяются при переподключении.</string>
+</resources>

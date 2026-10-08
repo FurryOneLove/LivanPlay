@@ -76,7 +76,6 @@
     <string name="audio_stream_unavailable">نوع البث %1$d غير متاح هنا (الحالة=%2$s)</string>
     <string name="resolution_handshake_prefix">دقة المصافحة:\u0020</string>
     <string name="safe_area_full_screen_at">المنطقة الآمنة: ملء الشاشة بحجم\u0020</string>
-    <string name="settings_android9_compat">الإعدادات التالية غير متاحة ومخفية على Android 9 (API 28):\n• Wi-Fi P2P (5 GHz) — يُستخدم LocalOnlyHotspot بدلاً منه.\n• مفكّك HEVC البرمجي — يُستخدم فك الترميز العتادي بدلاً منه.</string>
     <string name="settings_mfi_address_hint">يجب أن يبدأ العنوان بـ http:// أو https://. الرمز الاختياري ويُرسل كـ Authorization bearer token.</string>
     <string name="language_section_title">اللغة</string>
     <string name="language_app_language">لغة التطبيق</string>
@@ -98,7 +97,6 @@
     <string name="allow_precise_location_for_diplay_in_the_head_unit_s_app_p">اسمح بـ«الموقع الدقيق» لـ LivanPlay في أذونات تطبيق وحدة القيادة.</string>
     <string name="allow_the_connection_permission_to_continue">اسمح بإذن الاتصال للمتابعة</string>
     <string name="an_independent_carplay_receiver_for_android_head_units_wir">مستقبل CarPlay مستقل لوحدات قيادة Android. تعمل الاتصالات السلكية واللاسلكية على وحدة القيادة مع مصادقة محلية. يمكن لأي iPhone عادي الاتصال دون جيلبريك أو Mac أو جهاز إضافي أو تسجيل دخول.\n\nتستخدم هذه المعاينة هوية ملحق تجريبية. لا تزال التوافقية مع كل iPhone وكل وحدة قيادة قيد الاختبار. هذا المنتج غير معتمد من Apple.</string>
-    <string name="android_9_compatibility">توافق Android 9</string>
     <string name="app_permissions">أذونات التطبيق</string>
     <string name="app_settings">إعدادات التطبيق</string>
     <string name="apply_and_reconnect">تطبيق وإعادة الاتصال</string>
@@ -444,11 +442,6 @@
     <string name="carplay_dock_hint">مكان عرض CarPlay لتطبيقاته والساعة والحالة. التبديل بين «جهة السائق» و«في الأسفل» فوري؛ أما «تلقائي» فيترك الاختيار لجهاز iPhone ويُطبَّق بعد إعادة الاتصال.</string>
     <string name="split_screen_areas">CarPlay في الشاشة المقسومة</string>
     <string name="split_screen_areas_description">عندما تعرض الوحدة LivanPlay في شاشة مقسومة، يعيد CarPlay الرسم لتلك النافذة بدل أن يصغر مع أشرطة سوداء، ويعود إلى ملء الشاشة دون إعادة اتصال. يُحفظ حجم النافذة في المرة الأولى، فتطابق الصورة تمامًا من الاتصال التالي. إذا كان شريط التطبيقات على «تلقائي» يضعه CarPlay في الأسفل. يُطبَّق عند الاتصال التالي.</string>
-    <string name="carplay_rotation">تدوير CarPlay مع الشاشة دون إعادة اتصال</string>
-    <string name="carplay_rotation_description">للوحدات التي تدور شاشتها. يحصل CarPlay على صورة مربعة تضم شاشة أفقية وأخرى عمودية، فيعيد تدوير الشاشة رسم CarPlay بدل إعادة الاتصال. قد تزيد الصورة المربعة الأكبر من معالجة الفيديو وتقلل السلاسة، خصوصًا مع «أكثر وضوحًا» على شاشة كبيرة. إذا كنت نادرًا ما تدير الشاشة، فقد يساعد إبقاء هذا الخيار متوقفًا. لا تنطبق المنطقة الآمنة المخصصة على الصورة المربعة. يُطبَّق عند الاتصال التالي.</string>
-    <string name="carplay_rotation_picture">الصورة المربعة</string>
-    <string name="carplay_rotation_smoother">أكثر سلاسة (1920)</string>
-    <string name="carplay_rotation_sharper">أكثر وضوحًا (حجم الشاشة)</string>
     <string name="side_panel">لوحة جانبية بجوار CarPlay (تجريبي)</string>
     <string name="side_panel_description">يمكن نقل CarPlay إلى ثلثي الشاشة بينما يعرض LivanPlay لوحة في الباقي: على جانب الراكب في الشاشة الأفقية، وفي الأسفل في الشاشة العمودية (الساعة، والبطارية إذا تمت قراءتها). أظهرها وأخفها من قائمة الجلسة. يُطبَّق عند الاتصال التالي.</string>
     <string name="side_panel_show">اللوحة الجانبية</string>
