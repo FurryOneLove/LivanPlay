@@ -1,6 +1,7 @@
 package com.shilapi.xcertplay.hud
 
 import android.content.Context
+import com.shilapi.xcertplay.platform.VehiclePlatform
 import com.shilapi.xcertplay.transport.EvChargingConnectors
 
 /**
@@ -26,7 +27,8 @@ object BydOutputSettings {
     const val DEFAULT_LOW_CHARGE_PERCENT = 20
     val lowChargePresets = listOf(10, 15, 20, 25, 30)
 
-    fun enabled(context: Context): Boolean = prefs(context).getBoolean(KEY_ENABLED, true)
+    fun enabled(context: Context): Boolean =
+        VehiclePlatform.BYD_FEATURES && prefs(context).getBoolean(KEY_ENABLED, true)
 
     fun setEnabled(context: Context, enabled: Boolean) = prefs(context).edit().putBoolean(KEY_ENABLED, enabled).apply()
 
@@ -141,17 +143,19 @@ object BydOutputSettings {
     fun setLowChargePercent(context: Context, percent: Int) =
         prefs(context).edit().putInt(KEY_LOW_CHARGE_PERCENT, percent).apply()
 
-    fun standaloneHudAvailable(context: Context): Boolean = BydStandaloneHudOutput.available(context)
+    fun standaloneHudAvailable(context: Context): Boolean =
+        VehiclePlatform.BYD_FEATURES && BydStandaloneHudOutput.available(context)
     fun standaloneHudDiagnosticReport(context: Context): String = BydStandaloneHudOutput.diagnostics(context)
 
     /** Whether the head unit has a BYD navigation receiver. This says nothing about ADB vehicle data. */
-    fun navigationAvailable(context: Context): Boolean =
+    fun navigationAvailable(context: Context): Boolean = VehiclePlatform.BYD_FEATURES && (
         BydStandaloneHudOutput.available(context) ||
             BydAmapAdapter.find { installed(context, it) } != null ||
             installed(context, "com.ts.car.someip.service")
+        )
 
     /** Whether the head unit has a BYD navigation receiver or is a BYD head unit, so settings can show navigation/map options. */
-    fun available(context: Context): Boolean =
+    fun available(context: Context): Boolean = VehiclePlatform.BYD_FEATURES && (
         navigationAvailable(context) ||
             installed(context, "com.byd.carsettings") ||
             installed(context, "com.byd.appmgr") ||
@@ -162,6 +166,7 @@ object BydOutputSettings {
             android.os.Build.MANUFACTURER.contains("BYD", ignoreCase = true) ||
             android.os.Build.PRODUCT.contains("BYD", ignoreCase = true) ||
             android.os.Build.DEVICE.contains("BYD", ignoreCase = true)
+        )
 
     private fun installed(context: Context, pkg: String): Boolean =
         runCatching { context.packageManager.getPackageInfo(pkg, 0) }.isSuccess
@@ -169,7 +174,8 @@ object BydOutputSettings {
     private fun supportedInSelectedMode(
         context: Context,
         supported: (BydVehicleCapabilities) -> Boolean,
-    ): Boolean = !legacyVehicleProbe(context) || BydVehicleFieldStore.load(context)?.let(supported) == true
+    ): Boolean = VehiclePlatform.BYD_FEATURES &&
+        (!legacyVehicleProbe(context) || BydVehicleFieldStore.load(context)?.let(supported) == true)
 
     private fun prefs(context: Context) = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 }

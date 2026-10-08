@@ -1,5 +1,6 @@
 package com.shilapi.xcertplay
 
+import com.shilapi.xcertplay.platform.VehiclePlatform
 import android.content.Context
 import android.os.Build
 import com.shilapi.xcertplay.airplay.AirPlayDisplaySettings
@@ -108,9 +109,10 @@ object AirPlayPersistence {
     private const val SAFE_AREA_KEY_PREFIX = "safe_area_"
     private const val CUSTOM_ICON_FILE = "airplay-icon.png"
 
-    const val DEFAULT_MANUFACTURER = "DiPlay"
-    const val DEFAULT_MODEL = "DiPlay"
-    const val DEFAULT_OEM_LABEL = "BYD"
+    // What the iPhone shows for this accessory and on its CarPlay home icon.
+    val DEFAULT_MANUFACTURER = if (VehiclePlatform.BYD_FEATURES) "DiPlay" else "LivanPlay"
+    val DEFAULT_MODEL = if (VehiclePlatform.BYD_FEATURES) "DiPlay" else "LivanPlay"
+    val DEFAULT_OEM_LABEL = if (VehiclePlatform.BYD_FEATURES) "BYD" else "Livan"
     const val DEFAULT_MFI_I2C_PATH = "/dev/i2c-1"
 
     fun loadAmbientDelaySeconds(context: Context): Int =
@@ -308,13 +310,20 @@ object AirPlayPersistence {
         val stored = prefs.getString(KEY_WIRELESS_HOTSPOT_MODE, null)
         val mode = WirelessHotspotMode.entries.firstOrNull { it.name == stored }
             ?: WirelessHotspotMode.MANUAL
-        val supported = if (mode == WirelessHotspotMode.LOCAL_ONLY_HOTSPOT) WirelessHotspotMode.MANUAL else mode
+        val supported = supportedWirelessHotspotMode(mode)
         if (stored != supported.name) saveWirelessHotspotMode(context, supported)
         return supported
     }
 
+    /** Modes this head unit cannot run fall back to the built-in car hotspot. */
+    private fun supportedWirelessHotspotMode(mode: WirelessHotspotMode): WirelessHotspotMode = when {
+        mode == WirelessHotspotMode.LOCAL_ONLY_HOTSPOT -> WirelessHotspotMode.MANUAL
+        mode == WirelessHotspotMode.WIFI_P2P && VehiclePlatform.WIFI_DIRECT_CRASHES_SYSTEM -> WirelessHotspotMode.MANUAL
+        else -> mode
+    }
+
     fun saveWirelessHotspotMode(context: Context, mode: WirelessHotspotMode) {
-        val supported = if (mode == WirelessHotspotMode.LOCAL_ONLY_HOTSPOT) WirelessHotspotMode.MANUAL else mode
+        val supported = supportedWirelessHotspotMode(mode)
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
             .putString(KEY_WIRELESS_HOTSPOT_MODE, supported.name)
             .apply()

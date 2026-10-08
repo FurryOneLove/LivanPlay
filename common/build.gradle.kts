@@ -25,7 +25,11 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
         // The UI suite covers several SDKs and locale-specific resource sandboxes.
-        unitTests.all { it.maxHeapSize = "1g" }
+        unitTests.all {
+            it.maxHeapSize = "1g"
+            // The head-unit build keeps BYD outputs off; the inherited tests still cover them.
+            it.systemProperty("livanplay.bydFeatures", "true")
+        }
     }
 }
 

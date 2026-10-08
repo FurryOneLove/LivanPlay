@@ -158,7 +158,7 @@ class CarPlayHostActivity : ComponentActivity() {
         remoteMfiServer = remoteMfiServer.trim().takeIf { it.isNotEmpty() },
         remoteMfiToken = remoteMfiToken.takeIf { it.isNotEmpty() },
         identification = Iap2IdentificationConfig(
-            name = "DiPlay",
+            name = AirPlayPersistence.DEFAULT_MODEL,
             modelIdentifier = normalizedModel(),
             manufacturer = normalizedManufacturer(),
             serialNumber = "DIPLAY-" + DiPlayBootstrap.deviceId(airPlayIdentity).replace(":", ""),
@@ -170,7 +170,7 @@ class CarPlayHostActivity : ComponentActivity() {
             chargingConnectors = com.shilapi.xcertplay.hud.BydOutputSettings.chargingConnectors(this),
             vehicleSpeedEnabled = locationReportingEnabled && com.shilapi.xcertplay.hud.BydOutputSettings.wheelSpeedToIphoneActive(this),
         ),
-        label = "DiPlay",
+        label = AirPlayPersistence.DEFAULT_MODEL,
         hostName = "diplay-" + DiPlayBootstrap.deviceId(airPlayIdentity).replace(":", "").lowercase(),
         hostMac = DiPlayBootstrap.deviceId(airPlayIdentity).split(":").map { it.toInt(16).toByte() }.toByteArray(),
         wirelessBluetoothDeviceAddress = DiPlayPreferences.phoneAddress(this),
@@ -729,8 +729,31 @@ class CarPlayHostActivity : ComponentActivity() {
         } else {
             vpnReady = false
             awaitingVpnConsent = true
-            vpnConsent.launch(consent)
+            try {
+                vpnConsent.launch(consent)
+            } catch (_: android.content.ActivityNotFoundException) {
+                // No system VPN dialog on this firmware (ECARX IHU): approve through network ADB instead.
+                requestVpnConsentThroughAdb()
+            }
         }
+    }
+
+    private fun requestVpnConsentThroughAdb() {
+        val needsAdb = getString(R.string.vpn_consent_needs_adb, VpnConsentViaAdb.command(packageName))
+        setStatus(needsAdb)
+        Thread({
+            val granted = VpnConsentViaAdb.grant(applicationContext)
+            runOnUiThread {
+                awaitingVpnConsent = false
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (granted && CarPlayVpnService.prepare(this) == null) {
+                    vpnReady = true
+                    maybeStartCarPlay()
+                } else {
+                    setStatus(needsAdb)
+                }
+            }
+        }, "vpn-consent-adb").start()
     }
 
     private fun requestWirelessPermissions() {
@@ -3694,7 +3717,7 @@ class CarPlayHostActivity : ComponentActivity() {
         val carBluetoothAudio = AirPlayPersistence.loadCarBluetoothAudio(this)
         if (carBluetoothAudio) logCarBluetoothAudio()
         return AirPlayConfig(
-            deviceName = "DiPlay",
+            deviceName = AirPlayPersistence.DEFAULT_MODEL,
             deviceId = DiPlayBootstrap.deviceId(airPlayIdentity),
             btMac = DiPlayBluetooth.localAddress(this) ?: DiPlayBootstrap.deviceId(airPlayIdentity),
             sourceVersion = "950.7.1",

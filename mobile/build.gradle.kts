@@ -1,11 +1,25 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
 
 // Optional local-only input. CI and ordinary source builds contain no accessory identity.
-val localAuthenticationAssets = providers.environmentVariable("DIPLAY_AUTH_ASSETS_DIR")
-    .orNull?.let { file(it).canonicalFile }
+// LivanPlay: without the variable, a sibling "LivanPlay-runtime-assets" directory is used when present.
+val localAuthenticationAssets = (providers.environmentVariable("DIPLAY_AUTH_ASSETS_DIR").orNull?.let { file(it) }
+    ?: rootProject.file("../LivanPlay-runtime-assets").takeIf { it.resolve("offline-mfi/identity.pk8").isFile })
+    ?.canonicalFile
+
+// LivanPlay signing: keystore.properties in this project, else the one LivanDim already uses
+// (its storeFile is relative to LivanDim/app). Environment variables still win.
+val keystorePropsFile = listOf(rootProject.file("keystore.properties"), rootProject.file("../LivanDim/keystore.properties"))
+    .firstOrNull { it.isFile }
+val keystoreProps = Properties().apply { keystorePropsFile?.inputStream()?.use { load(it) } }
+val keystoreStoreFile = keystoreProps.getProperty("storeFile")?.let { path ->
+    val base = keystorePropsFile!!.parentFile
+    listOf(file(path), base.resolve(path), base.resolve("app").resolve(path)).firstOrNull { it.isFile }
+}
 
 android {
     namespace = "com.shilapi.xcertplay"
@@ -14,11 +28,12 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.shihab.diplay"
+        applicationId = "ru.who.livanplay"
         minSdk = 25
         targetSdk = 37
-        versionCode = 34
-        versionName = "0.2.15"
+        // LivanPlay numbering; the DiPlay release this tree is based on follows the dash.
+        versionCode = 1
+        versionName = "0.1.0-diplay0.2.15"
 
     }
 
@@ -27,20 +42,21 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file(
-                providers.environmentVariable("ANDROID_KEYSTORE_PATH")
-                    .getOrElse("missing-release-keystore.jks"),
-            )
-            storePassword = providers.environmentVariable("ANDROID_KEYSTORE_PASSWORD").getOrElse("")
-            keyAlias = providers.environmentVariable("ANDROID_KEY_ALIAS").getOrElse("")
-            keyPassword = providers.environmentVariable("ANDROID_KEY_PASSWORD").getOrElse("")
+            storeFile = providers.environmentVariable("ANDROID_KEYSTORE_PATH").orNull?.let { file(it) }
+                ?: keystoreStoreFile ?: file("missing-release-keystore.jks")
+            storePassword = providers.environmentVariable("ANDROID_KEYSTORE_PASSWORD")
+                .getOrElse(keystoreProps.getProperty("storePassword", ""))
+            keyAlias = providers.environmentVariable("ANDROID_KEY_ALIAS")
+                .getOrElse(keystoreProps.getProperty("keyAlias", ""))
+            keyPassword = providers.environmentVariable("ANDROID_KEY_PASSWORD")
+                .getOrElse(keystoreProps.getProperty("keyPassword", ""))
         }
     }
 
     buildTypes {
         debug {
-            applicationIdSuffix = ".hudtest"
-            versionNameSuffix = "-hud-test"
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
         }
         release {
             optimization {

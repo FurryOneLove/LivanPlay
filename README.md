@@ -1,3 +1,28 @@
+# LivanPlay
+
+LivanPlay is a fork of [DiPlay](https://github.com/shihabal3amri/DiPlay) 0.2.15 for ECARX IHU601/IHU602 head units
+(Livan, Android 9). Package `ru.who.livanplay`. It is a modified version of DiPlay and stays under GPL-3.0.
+
+What differs from DiPlay:
+
+- BYD HUD, cluster and vehicle-data outputs are switched off by `VehiclePlatform.BYD_FEATURES`; the code stays so upstream changes keep merging.
+- The setup guide has no DiLink step, and the in-app updater (it downloads DiPlay releases) is hidden.
+- The head unit has no system VPN dialog: the USB link's local VPN is approved through network ADB
+  (`adb shell appops set ru.who.livanplay ACTIVATE_VPN allow`).
+- Wi-Fi Direct is not offered on IHU601/IHU602: an iPhone joining the group crashes `system_server` on this firmware.
+  Use the built-in car hotspot or Existing Wi-Fi.
+- The CarPlay home icon and accessory name say Livan/LivanPlay.
+- The Gradle daemon JDK pin is removed, so the project builds with the installed JDK (17 or newer).
+- Release signing reads `keystore.properties`; runtime authentication assets come from `DIPLAY_AUTH_ASSETS_DIR`
+  or a sibling `LivanPlay-runtime-assets` directory. Neither is in this repository.
+
+On the tested IHU602G, disable the stock QDLink app before using wired CarPlay, because it grabs the iPhone over USB:
+`adb shell pm disable-user --user 0 com.neusoft.ssp.ces.c4.car.assistant`.
+
+The original DiPlay README follows.
+
+---
+
 # DiPlay
 
 **CarPlay for compatible BYD Android head units.** Wired and wireless, with the familiar DiAuto interface. Independent app: `com.shihab.diplay`.

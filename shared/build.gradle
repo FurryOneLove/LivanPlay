@@ -31,6 +31,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    testOptions {
+        // The head-unit build keeps BYD outputs off; the inherited tests still cover them.
+        unitTests.all { it.systemProperty 'livanplay.bydFeatures', 'true' }
+    }
 }
 dependencies {
     implementation libs.androidx.app

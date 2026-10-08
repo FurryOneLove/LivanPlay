@@ -61,6 +61,7 @@ import com.shilapi.xcertplay.network.WifiP2pChannels
 import com.shilapi.xcertplay.orchestration.WirelessHotspotMode
 import com.shilapi.xcertplay.settings.SettingsTheme
 import com.shilapi.xcertplay.settings.SettingsWidgets
+import com.shilapi.xcertplay.platform.VehiclePlatform
 import com.shilapi.xcertplay.setup.DiLinkGeneration
 import com.shilapi.xcertplay.setup.SetupGuide
 import com.shilapi.xcertplay.transport.EvChargingConnectors
@@ -144,7 +145,7 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
     private var page = "home"
     private var settingsCategory = SettingsCategory.OVERVIEW
     private var connectionSettingsReturnCategory: SettingsCategory? = null
-    private var setupStep = SetupGuide.STEP_CAR
+    private var setupStep = SetupGuide.FIRST_STEP
     private var setupFromSettings = false
     private var settingsSectionFilter: Set<SettingsSection>? = null
     private var clusterSafeAreaDialog: Dialog? = null
@@ -335,7 +336,7 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
             ?: SettingsCategory.OVERVIEW
         connectionSettingsReturnCategory = savedInstanceState?.getString("connection_settings_return_category")
             ?.let { runCatching { SettingsCategory.valueOf(it) }.getOrNull() }
-        setupStep = savedInstanceState?.getInt("setup_step") ?: SetupGuide.STEP_CAR
+        setupStep = savedInstanceState?.getInt("setup_step") ?: SetupGuide.FIRST_STEP
         setupFromSettings = savedInstanceState?.getBoolean("setup_from_settings") ?: false
         page = savedInstanceState?.getString("page") ?: intent.getStringExtra("page")
             ?: if (setupError == null && SetupGuide.shouldOpenOnLaunch(SetupGuide.seen(this),
@@ -716,7 +717,7 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
                 page = "settings"
                 settingsCategory = SettingsCategory.OVERVIEW
             }
-            page == "setup" && setupStep > SetupGuide.STEP_CAR -> setupStep--
+            page == "setup" && setupStep > SetupGuide.FIRST_STEP -> setupStep--
             page == "setup" -> {
                 closeSetupGuide()
                 return
@@ -1954,7 +1955,7 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
         content.addView(label(getString(R.string.carplay_at_home_in_your_car), 20, MUTED).apply { setPadding(0, dp(8), 0, dp(24)) })
         section(content, getString(R.string.about_public_preview_prefix, version())) { card ->
             card.addView(label(getString(R.string.an_independent_carplay_receiver_for_android_head_units_wir), 17, TEXT))
-            card.addView(updateRow())
+            if (VehiclePlatform.UPSTREAM_UPDATES) card.addView(updateRow())
         }
         section(content, getString(R.string.made_possible_by_open_source)) { card ->
             card.addView(label(getString(R.string.receiver_based_on_xcertplay_licensed_under_gpl_3_0_diplay), 16, MUTED))
@@ -2334,7 +2335,7 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
 
     private fun openSetupGuide(fromSettings: Boolean) {
         setupFromSettings = fromSettings
-        setupStep = SetupGuide.STEP_CAR
+        setupStep = SetupGuide.FIRST_STEP
         page = "setup"
         render()
     }
@@ -2343,7 +2344,7 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
         SetupGuide.markSeen(this)
         page = if (setupFromSettings) "settings" else "home"
         setupFromSettings = false
-        setupStep = SetupGuide.STEP_CAR
+        setupStep = SetupGuide.FIRST_STEP
         render()
         if (connectNow) connect(AirPlayPersistence.loadWirelessEnabled(this))
     }
@@ -2356,14 +2357,16 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
     })
 
     private fun setupGuide(content: LinearLayout) {
-        val step = setupStep.coerceIn(SetupGuide.STEP_CAR, SetupGuide.STEP_DONE)
-        content.addView(label(getString(R.string.setup_step_of, step + 1, SetupGuide.STEP_COUNT), 13, ACCENT, true)
+        val step = setupStep.coerceIn(SetupGuide.FIRST_STEP, SetupGuide.STEP_DONE)
+        val shown = step - SetupGuide.FIRST_STEP
+        val shownCount = SetupGuide.STEP_COUNT - SetupGuide.FIRST_STEP
+        content.addView(label(getString(R.string.setup_step_of, shown + 1, shownCount), 13, ACCENT, true)
             .apply { letterSpacing = .12f })
         val progress = row().apply { setPadding(0, dp(10), 0, dp(20)) }
-        repeat(SetupGuide.STEP_COUNT) { index ->
+        repeat(shownCount) { index ->
             progress.addView(View(this).apply {
                 background = GradientDrawable().apply {
-                    setColor(if (index <= step) ACCENT else BUTTON); cornerRadius = dp(3).toFloat()
+                    setColor(if (index <= shown) ACCENT else BUTTON); cornerRadius = dp(3).toFloat()
                 }
             }, LinearLayout.LayoutParams(0, dp(6), 1f).apply { if (index > 0) marginStart = dp(8) })
         }
@@ -2443,7 +2446,7 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
     private fun setupFeaturesStep(content: LinearLayout) {
         val generation = DiLinkGeneration.current(this)
         setupTitle(content, R.string.setup_features_title, getString(R.string.setup_features_description,
-            dilinkLabel(generation)))
+            if (VehiclePlatform.BYD_FEATURES) dilinkLabel(generation) else Build.PRODUCT))
         if (SetupGuide.hasConflictingClusterRoute(generation, AirPlayPersistence.loadAdbClusterEnabled(this))) {
             val warning = card()
             warning.addView(label(getString(R.string.setup_cluster_route_conflict), 16, WARNING))
@@ -2519,7 +2522,7 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
         card.addView(button(getString(R.string.settings), false) {
             SetupGuide.markSeen(this)
             setupFromSettings = false
-            setupStep = SetupGuide.STEP_CAR
+            setupStep = SetupGuide.FIRST_STEP
             page = "settings"
             render()
         }, matchButton(12, 60))
@@ -2550,13 +2553,14 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
 
     private fun wirelessLinkControls(parent: LinearLayout) {
         val mode = if (pendingCarHotspotSetup) WirelessHotspotMode.MANUAL else AirPlayPersistence.loadWirelessHotspotMode(this)
-        val modes = listOf(WirelessHotspotMode.MANUAL, WirelessHotspotMode.WIFI_P2P, WirelessHotspotMode.EXISTING_WIFI)
-        val titles = listOf(getString(R.string.built_in_car_hotspot), getString(R.string.wifi_direct), getString(R.string.existing_wifi_title))
-        val descriptions = listOf(
-            getString(R.string.hotspot_mode_manual_desc),
-            getString(R.string.hotspot_mode_p2p_desc),
-            getString(R.string.existing_wifi_description)
-        )
+        val options = listOf(
+            Triple(WirelessHotspotMode.MANUAL, getString(R.string.built_in_car_hotspot), getString(R.string.hotspot_mode_manual_desc)),
+            Triple(WirelessHotspotMode.WIFI_P2P, getString(R.string.wifi_direct), getString(R.string.hotspot_mode_p2p_desc)),
+            Triple(WirelessHotspotMode.EXISTING_WIFI, getString(R.string.existing_wifi_title), getString(R.string.existing_wifi_description)),
+        ).filterNot { it.first == WirelessHotspotMode.WIFI_P2P && VehiclePlatform.WIFI_DIRECT_CRASHES_SYSTEM }
+        val modes = options.map { it.first }
+        val titles = options.map { it.second }
+        val descriptions = options.map { it.third }
         val wide = resources.configuration.screenWidthDp >= 850
         val choices = if (wide) row().apply { gravity = Gravity.TOP } else column()
         parent.addView(choices)
