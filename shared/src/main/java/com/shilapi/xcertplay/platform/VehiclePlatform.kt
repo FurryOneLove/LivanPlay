@@ -2,19 +2,8 @@ package com.shilapi.xcertplay.platform
 
 import android.os.Build
 
-/**
- * Fork switches for the ECARX IHU601/IHU602 head units (Livan, Android 9).
- *
- * The BYD DiLink outputs stay in the source so upstream changes keep merging, but this build never
- * offers or starts them. Everything BYD-specific must be reached through [BYD_FEATURES].
- */
+/** What differs on the ECARX IHU601/IHU602 head units (Livan, Android 9) this app targets. */
 object VehiclePlatform {
-    /**
-     * BYD HUD/cluster/vehicle-data outputs and the DiLink setup step. Off on a head unit; the
-     * inherited unit tests turn it on with a JVM property so that code stays covered.
-     */
-    val BYD_FEATURES: Boolean = java.lang.Boolean.getBoolean("livanplay.bydFeatures")
-
     /** The in-app updater downloads upstream DiPlay releases, which cannot update this package. */
     const val UPSTREAM_UPDATES = false
 

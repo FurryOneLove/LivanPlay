@@ -1,50 +1,27 @@
 package com.shilapi.xcertplay.setup
 
 import android.content.Context
-import com.shilapi.xcertplay.platform.VehiclePlatform
 
-/** Which features the setup guide offers for each DiLink generation, and how well each is proven. */
+/** Which features the setup guide offers, and how well each is proven. */
 object SetupGuide {
-    const val STEP_CAR = 0
-    const val STEP_CONNECTION = 1
-    const val STEP_IPHONE = 2
-    const val STEP_FEATURES = 3
-    const val STEP_DONE = 4
-    const val STEP_COUNT = 5
+    const val STEP_CONNECTION = 0
+    const val STEP_IPHONE = 1
+    const val STEP_FEATURES = 2
+    const val STEP_DONE = 3
+    const val STEP_COUNT = 4
 
-    /** Without BYD outputs there is no DiLink generation to pick, so the guide opens on the connection. */
-    val FIRST_STEP = if (VehiclePlatform.BYD_FEATURES) STEP_CAR else STEP_CONNECTION
+    enum class Feature { AUTO_CONNECT, LOCATION }
 
-    enum class Feature { AUTO_CONNECT, LOCATION, CLUSTER_MAP, BYD_NAVIGATION, CALLS_ON_DASHBOARD, CALL_KEYS, DILINK4_ADB_CLUSTER }
-
-    /** TESTED: confirmed on at least one car of this generation. HIDDEN: not offered in the guide. */
-    enum class Status { TESTED, EXPERIMENTAL, HIDDEN }
+    /** TESTED: confirmed on at least one head unit. */
+    enum class Status { TESTED, EXPERIMENTAL }
 
     data class Entry(val feature: Feature, val status: Status, val needsAdb: Boolean)
 
     /** Claims follow docs/COMPATIBILITY.md: community reports, not a certified support list. */
-    fun features(generation: DiLinkGeneration): List<Entry> {
+    fun features(): List<Entry> {
         fun entry(feature: Feature, status: Status, needsAdb: Boolean = false) = Entry(feature, status, needsAdb)
-        if (!VehiclePlatform.BYD_FEATURES) {
-            return listOf(entry(Feature.AUTO_CONNECT, Status.TESTED), entry(Feature.LOCATION, Status.TESTED))
-        }
-        val dilink3 = generation == DiLinkGeneration.DILINK_3
-        val dilink4 = generation == DiLinkGeneration.DILINK_4
-        return listOf(
-            entry(Feature.AUTO_CONNECT, Status.TESTED),
-            entry(Feature.LOCATION, Status.TESTED),
-            entry(Feature.CLUSTER_MAP, if (dilink3) Status.TESTED else Status.EXPERIMENTAL),
-            // DiLink 4 needs its own ADB cluster route; on DiLink 3 that route blocks the dashboard map.
-            entry(Feature.DILINK4_ADB_CLUSTER, if (dilink4) Status.EXPERIMENTAL else Status.HIDDEN, needsAdb = true),
-            entry(Feature.BYD_NAVIGATION, if (dilink3 || generation == DiLinkGeneration.DILINK_5) Status.TESTED else Status.EXPERIMENTAL),
-            entry(Feature.CALLS_ON_DASHBOARD, if (dilink3) Status.EXPERIMENTAL else Status.HIDDEN, needsAdb = true),
-            entry(Feature.CALL_KEYS, if (dilink3) Status.EXPERIMENTAL else Status.HIDDEN, needsAdb = true),
-        ).filter { it.status != Status.HIDDEN }
+        return listOf(entry(Feature.AUTO_CONNECT, Status.TESTED), entry(Feature.LOCATION, Status.TESTED))
     }
-
-    /** A DiLink 3 car with the DiLink 4 route on never sends the DiLink 3 dashboard commands. */
-    fun hasConflictingClusterRoute(generation: DiLinkGeneration, adbClusterEnabled: Boolean): Boolean =
-        VehiclePlatform.BYD_FEATURES && generation == DiLinkGeneration.DILINK_3 && adbClusterEnabled
 
     private fun prefs(context: Context) = context.getSharedPreferences("diplay", Context.MODE_PRIVATE)
 

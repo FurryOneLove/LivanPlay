@@ -6,19 +6,12 @@ import android.media.AudioManager
 import android.os.Looper
 import android.view.KeyEvent
 import android.widget.Button
-import com.shilapi.xcertplay.hud.BydOutputSettings
-import com.shilapi.xcertplay.hud.BydCarPlayCall
-import com.shilapi.xcertplay.hud.CarPlayCallState
-import com.shilapi.xcertplay.iap2.message.Iap2Messages
-import com.shilapi.xcertplay.media.AndroidMediaSink
-import com.shilapi.xcertplay.orchestration.CarPlayController
 import java.time.Duration
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.*
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
@@ -46,8 +39,6 @@ class WheelKeyServiceTest {
 
     @After fun tearDown() {
         service.onDestroy()
-        BydOutputSettings.setCarPlayCallControls(service, false)
-        BydCarPlayCall.end()
         CarPlayBackgroundSession.clear()
     }
 
@@ -218,18 +209,6 @@ class WheelKeyServiceTest {
         assertTrue(knobs.isEmpty())
     }
 
-    @Test fun experimentalVoiceKeysRemainWithTheCarUntilOptIn() {
-        service.session = { "active-phone" }
-        BydOutputSettings.setCarPlayCallControls(service, false)
-        assertEquals(false to false, press(327))
-        assertEquals(false to false, press(328))
-        BydOutputSettings.setCarPlayCallControls(service, true)
-        assertEquals(true to true, press(327))
-        assertEquals(true to true, press(328))
-        BydOutputSettings.setCarPlayCallControls(service, false)
-        assertEquals(false to false, press(327))
-    }
-
     @Test
     fun theAllowedListKeepsOtherServicesAndRebindsAListedButStoppedService() {
         val ours = "com.shihab.diplay/com.shilapi.xcertplay.WheelKeyService"
@@ -345,26 +324,5 @@ class WheelKeyServiceTest {
         assertTrue(key(KeyEvent.KEYCODE_F1, true, time = 1_000))
         assertTrue(key(KeyEvent.KEYCODE_F1, false, time = 1_000))
         assertEquals(2, siriRequests)
-    }
-
-    @Test fun aHeldSiriCallKeyCannotEndTheCallThatArrivesBeforeItsRelease() {
-        siriSetUp()
-        val controller = mock(CarPlayController::class.java)
-        `when`(controller.activeAirPlaySessionToken()).thenReturn(Any())
-        CarPlayBackgroundSession.store(controller, mock(AndroidMediaSink::class.java), 1, 1,
-            this, mock(CarPlaySessionDisplay::class.java)) { it() }
-        BydOutputSettings.setCarPlayCallControls(service, true)
-        WheelZoomSettings.assign(service, WheelZoomSettings.Role.SIRI, WheelKey(KeyEvent.KEYCODE_ENDCALL, 0, "?"))
-        assertTrue(key(KeyEvent.KEYCODE_ENDCALL, true))
-        assertEquals(1, siriRequests)
-        BydCarPlayCall.onFrame(Iap2Messages.buildRaw(CarPlayCallState.CALL_STATE_UPDATE) {
-            u8(2, 4); string(4, "new-call")
-        })
-        assertTrue(key(KeyEvent.KEYCODE_ENDCALL, false))
-        verify(controller, never()).endCall()
-        assertTrue(key(KeyEvent.KEYCODE_ENDCALL, true))
-        assertTrue(key(KeyEvent.KEYCODE_ENDCALL, false))
-        verify(controller, times(1)).endCall()
-        assertEquals(1, siriRequests)
     }
 }

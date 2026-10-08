@@ -6,8 +6,6 @@ import android.os.Build
 import com.shilapi.xcertplay.airplay.AirPlayDisplaySettings
 import com.shilapi.xcertplay.airplay.AirPlayPhysicalSizeBasis
 import com.shilapi.xcertplay.airplay.CarPlayDisplayScale
-import com.shilapi.xcertplay.airplay.CarPlayClusterDisplay
-import com.shilapi.xcertplay.airplay.ClusterTurnCardOverlay
 import com.shilapi.xcertplay.airplay.CarPlayUiScale
 import com.shilapi.xcertplay.airplay.AirPlayIdentity
 import com.shilapi.xcertplay.airplay.PairingStore
@@ -73,23 +71,6 @@ object AirPlayPersistence {
     private const val KEY_CALL_ECHO_CANCELLATION = "call_echo_cancellation"
     private const val KEY_CALL_VOICE_FILTER = "call_voice_filter"
     private const val KEY_SMOOTH_VIDEO = "smooth_video"
-    private const val KEY_CLUSTER_MAP = "cluster_map_enabled"
-    private const val KEY_ADB_CLUSTER_ACTIVITY = "adb_cluster_activity_enabled"
-    private const val KEY_CENTER_MAP_OVERLAY = "center_map_overlay"
-    private const val KEY_CENTER_MAP_AUTO_HIDE = "center_map_auto_hide"
-    private const val KEY_LAUNCHER_MAP_SHARING = "launcher_map_sharing"
-    private const val KEY_CLUSTER_MAP_SCALE = "cluster_map_scale_percent"
-    private const val KEY_CLUSTER_CONTENT = "cluster_content"
-    private const val KEY_CLUSTER_MARKER_X = "cluster_marker_horizontal_step"
-    private const val KEY_CLUSTER_MARKER_Y = "cluster_marker_vertical_step"
-    private const val KEY_CLUSTER_SMALL_WINDOW_MODE = "cluster_small_window_mode"
-    private const val KEY_CLUSTER_SMALL_WINDOW_MARKER_X = "cluster_small_window_marker_x"
-    private const val KEY_CLUSTER_SMALL_WINDOW_MARKER_Y = "cluster_small_window_marker_y"
-    private const val KEY_CLUSTER_TURN_CARD_OVERLAY_POSITION = "cluster_turn_card_overlay_position"
-    private const val KEY_CLUSTER_TURN_CARD_OVERLAY_SIZE = "cluster_turn_card_overlay_size"
-    private const val KEY_CLUSTER_TURN_CARD_OVERLAY_X = "cluster_turn_card_overlay_x_percent"
-    private const val KEY_CLUSTER_TURN_CARD_OVERLAY_Y = "cluster_turn_card_overlay_y_percent"
-    private const val KEY_CENTER_MAP_FOLLOWS_DASHBOARD = "center_map_follows_dashboard"
     private const val KEY_SETTINGS_GESTURE_FINGERS = "settings_gesture_fingers"
     private const val KEY_WIDTH_PHYSICAL_MM = "display_width_physical_mm"
     private const val KEY_PHYSICAL_SIZE_BASIS = "display_physical_size_basis"
@@ -110,9 +91,9 @@ object AirPlayPersistence {
     private const val CUSTOM_ICON_FILE = "airplay-icon.png"
 
     // What the iPhone shows for this accessory and on its CarPlay home icon.
-    val DEFAULT_MANUFACTURER = if (VehiclePlatform.BYD_FEATURES) "DiPlay" else "LivanPlay"
-    val DEFAULT_MODEL = if (VehiclePlatform.BYD_FEATURES) "DiPlay" else "LivanPlay"
-    val DEFAULT_OEM_LABEL = if (VehiclePlatform.BYD_FEATURES) "BYD" else "Livan"
+    val DEFAULT_MANUFACTURER = "LivanPlay"
+    val DEFAULT_MODEL = "LivanPlay"
+    val DEFAULT_OEM_LABEL = "Livan"
     const val DEFAULT_MFI_I2C_PATH = "/dev/i2c-1"
 
     fun loadAmbientDelaySeconds(context: Context): Int =
@@ -136,11 +117,6 @@ object AirPlayPersistence {
                 percent.coerceIn(CarPlayDisplayScale.MIN_PERCENT, CarPlayDisplayScale.MAX_PERCENT),
             ).apply()
     }
-    /** Applied by the CarPlay host so overlay position/size updates without reconnecting. */
-    @Volatile var overlaySettingsListener: (() -> Unit)? = null
-
-    private const val KEY_CLUSTER_TURN_CARD_OVERLAY_SIZE_PERCENT = "cluster_turn_card_overlay_size_percent"
-    private const val KEY_CLUSTER_TURN_CARD_OPACITY = "cluster_turn_card_opacity_percent"
 
     fun loadDisplayScaleTenths(context: Context): Int {
         val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -637,73 +613,12 @@ object AirPlayPersistence {
             .apply()
     }
 
-    fun loadClusterMapEnabled(context: Context): Boolean =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_CLUSTER_MAP, false)
-
-    fun loadAdbClusterEnabled(context: Context): Boolean = loadClusterMapEnabled(context) &&
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_ADB_CLUSTER_ACTIVITY, false)
-
-    fun saveAdbClusterEnabled(context: Context, enabled: Boolean) {
-        val edit = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .putBoolean(KEY_ADB_CLUSTER_ACTIVITY, enabled)
-        if (enabled) edit.putBoolean(KEY_CLUSTER_MAP, true)
-        edit.apply()
-    }
-
-    fun saveClusterMapEnabled(context: Context, enabled: Boolean) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean(KEY_CLUSTER_MAP, enabled).apply()
-    }
-
-    /** The dashboard map as a card on the centre screen while DiPlay is in the background. */
-    fun loadCenterMapOverlay(context: Context): Boolean =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_CENTER_MAP_OVERLAY, false)
-
-    /** Automatically hide the floating card when non-launcher apps are in the foreground. */
-    fun loadCenterMapAutoHide(context: Context): Boolean =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_CENTER_MAP_AUTO_HIDE, true)
-
-    fun saveCenterMapAutoHide(context: Context, enabled: Boolean) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean(KEY_CENTER_MAP_AUTO_HIDE, enabled).apply()
-    }
-
-    /** Other launchers may show the live dashboard map in their own screen (MapEmbedService). */
-    fun loadLauncherMapSharing(context: Context): Boolean =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_LAUNCHER_MAP_SHARING, false)
-
-    fun saveLauncherMapSharing(context: Context, enabled: Boolean) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean(KEY_LAUNCHER_MAP_SHARING, enabled).apply()
-    }
-
-    /** Observe consent changes for already attached launcher maps; call the returned function to unregister. */
-    internal fun observeLauncherMapSharing(context: Context, changed: (Boolean) -> Unit): () -> Unit {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == KEY_LAUNCHER_MAP_SHARING) changed(loadLauncherMapSharing(context))
-        }
-        prefs.registerOnSharedPreferenceChangeListener(listener)
-        return { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
-    }
-
-    fun saveCenterMapOverlay(context: Context, enabled: Boolean) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean(KEY_CENTER_MAP_OVERLAY, enabled).apply()
-    }
-
     /** Whether to renegotiate resolution when entering/exiting freeform floating windows or launcher PiP. */
     fun loadAdaptPipResolution(context: Context): Boolean =
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_ADAPT_PIP_RESOLUTION, false)
 
     fun saveAdaptPipResolution(context: Context, enabled: Boolean) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean(KEY_ADAPT_PIP_RESOLUTION, enabled).apply()
-    }
-
-    fun loadClusterContent(context: Context): CarPlayClusterDisplay.Content =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_CLUSTER_CONTENT, null)
-            ?.let { name -> CarPlayClusterDisplay.Content.entries.firstOrNull { it.name == name } }
-            ?: if (AdbClusterRouter.enabled(context)) CarPlayClusterDisplay.Content.INSTRUMENTS else CarPlayClusterDisplay.Content.MAP
-
-    fun saveClusterContent(context: Context, content: CarPlayClusterDisplay.Content) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY_CLUSTER_CONTENT, content.name).apply()
-        overlaySettingsListener?.invoke()
     }
 
     /** Fingers for the swipe-down that opens settings; some head units reserve three. */
@@ -714,164 +629,6 @@ object AirPlayPersistence {
     fun saveSettingsGestureFingers(context: Context, fingers: Int) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
             .putInt(KEY_SETTINGS_GESTURE_FINGERS, fingers.coerceIn(2, 4)).apply()
-    }
-
-    fun loadCenterMapFollowsDashboard(context: Context): Boolean =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getBoolean(KEY_CENTER_MAP_FOLLOWS_DASHBOARD, true)
-
-    fun saveCenterMapFollowsDashboard(context: Context, enabled: Boolean) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .putBoolean(KEY_CENTER_MAP_FOLLOWS_DASHBOARD, enabled).apply()
-    }
-
-    fun loadClusterTurnCardOverlaySizePercent(context: Context): Int {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        if (prefs.contains(KEY_CLUSTER_TURN_CARD_OVERLAY_SIZE_PERCENT)) {
-            return ClusterTurnCardOverlay.snap(
-                prefs.getInt(KEY_CLUSTER_TURN_CARD_OVERLAY_SIZE_PERCENT, ClusterTurnCardOverlay.DEFAULT_SIZE_PERCENT),
-                ClusterTurnCardOverlay.sizePercents,
-            )
-        }
-        return when (prefs.getString(KEY_CLUSTER_TURN_CARD_OVERLAY_SIZE, null)) {
-            "SMALL" -> 40
-            "LARGE" -> 70
-            else -> ClusterTurnCardOverlay.DEFAULT_SIZE_PERCENT
-        }
-    }
-
-    fun saveClusterTurnCardOverlaySizePercent(context: Context, percent: Int) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .putInt(
-                KEY_CLUSTER_TURN_CARD_OVERLAY_SIZE_PERCENT,
-                ClusterTurnCardOverlay.snap(percent, ClusterTurnCardOverlay.sizePercents),
-            ).apply()
-        overlaySettingsListener?.invoke()
-    }
-
-    fun loadClusterTurnCardOpacityPercent(context: Context): Int =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getInt(KEY_CLUSTER_TURN_CARD_OPACITY, ClusterTurnCardOverlay.DEFAULT_OPACITY_PERCENT)
-            .coerceIn(20, 100)
-
-    fun saveClusterTurnCardOpacityPercent(context: Context, percent: Int) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .putInt(KEY_CLUSTER_TURN_CARD_OPACITY, percent.coerceIn(20, 100)).apply()
-        overlaySettingsListener?.invoke()
-    }
-
-    fun loadClusterTurnCardOverlayXPercent(context: Context): Int {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        val raw = if (prefs.contains(KEY_CLUSTER_TURN_CARD_OVERLAY_X)) {
-            prefs.getInt(KEY_CLUSTER_TURN_CARD_OVERLAY_X, ClusterTurnCardOverlay.DEFAULT_X_PERCENT)
-        } else when (prefs.getString(KEY_CLUSTER_TURN_CARD_OVERLAY_POSITION, null)) {
-            "LEFT" -> 20
-            "CENTER" -> 50
-            else -> ClusterTurnCardOverlay.DEFAULT_X_PERCENT
-        }
-        return ClusterTurnCardOverlay.snap(raw, ClusterTurnCardOverlay.xPercents)
-    }
-
-    fun saveClusterTurnCardOverlayXPercent(context: Context, percent: Int) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .putInt(
-                KEY_CLUSTER_TURN_CARD_OVERLAY_X,
-                ClusterTurnCardOverlay.snap(percent, ClusterTurnCardOverlay.xPercents),
-            ).apply()
-        overlaySettingsListener?.invoke()
-    }
-
-    fun loadClusterTurnCardOverlayYPercent(context: Context): Int {
-        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-        if (prefs.contains(KEY_CLUSTER_TURN_CARD_OVERLAY_Y)) {
-            return ClusterTurnCardOverlay.snap(
-                prefs.getInt(KEY_CLUSTER_TURN_CARD_OVERLAY_Y, ClusterTurnCardOverlay.DEFAULT_Y_PERCENT),
-                ClusterTurnCardOverlay.yPercents,
-            )
-        }
-        return ClusterTurnCardOverlay.DEFAULT_Y_PERCENT
-    }
-
-    fun saveClusterTurnCardOverlayYPercent(context: Context, percent: Int) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .putInt(
-                KEY_CLUSTER_TURN_CARD_OVERLAY_Y,
-                ClusterTurnCardOverlay.snap(percent, ClusterTurnCardOverlay.yPercents),
-            ).apply()
-        overlaySettingsListener?.invoke()
-    }
-
-    fun loadClusterMapScalePercent(context: Context): Int = CarPlayClusterDisplay.STREAM_SCALE_PERCENT.let { default ->
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt(KEY_CLUSTER_MAP_SCALE, default)
-            .takeIf { it in CarPlayClusterDisplay.scalePresets } ?: default
-    }
-
-    fun saveClusterMapScalePercent(context: Context, percent: Int) {
-        if (percent !in CarPlayClusterDisplay.scalePresets) return
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putInt(KEY_CLUSTER_MAP_SCALE, percent).apply()
-    }
-
-    fun loadClusterMarkerHorizontalStep(context: Context): Int =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt(KEY_CLUSTER_MARKER_X, 0)
-            .coerceIn(CarPlayClusterDisplay.horizontalSteps)
-
-    fun saveClusterMarkerHorizontalStep(context: Context, step: Int) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .putInt(KEY_CLUSTER_MARKER_X, step.coerceIn(CarPlayClusterDisplay.horizontalSteps)).apply()
-    }
-
-    fun loadClusterMarkerVerticalStep(context: Context): Int =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt(KEY_CLUSTER_MARKER_Y, 0)
-            .coerceIn(CarPlayClusterDisplay.verticalSteps)
-
-    fun saveClusterMarkerVerticalStep(context: Context, step: Int) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .putInt(KEY_CLUSTER_MARKER_Y, step.coerceIn(CarPlayClusterDisplay.verticalSteps)).apply()
-    }
-
-    /** 0 off, 1 always small-window positions, 2 auto from the cluster. Default off. */
-    fun loadClusterSmallWindowMode(context: Context): Int =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getInt(KEY_CLUSTER_SMALL_WINDOW_MODE, 0).coerceIn(0, 2)
-
-    fun saveClusterSmallWindowMode(context: Context, mode: Int) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .putInt(KEY_CLUSTER_SMALL_WINDOW_MODE, mode.coerceIn(0, 2)).apply()
-    }
-
-    fun loadClusterSmallWindowMarkerHorizontalStep(context: Context): Int =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getInt(KEY_CLUSTER_SMALL_WINDOW_MARKER_X, 3)
-            .coerceIn(CarPlayClusterDisplay.horizontalSteps)
-
-    fun saveClusterSmallWindowMarkerHorizontalStep(context: Context, step: Int) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .putInt(KEY_CLUSTER_SMALL_WINDOW_MARKER_X, step.coerceIn(CarPlayClusterDisplay.horizontalSteps)).apply()
-    }
-
-    fun loadClusterSmallWindowMarkerVerticalStep(context: Context): Int =
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getInt(KEY_CLUSTER_SMALL_WINDOW_MARKER_Y, 0)
-            .coerceIn(CarPlayClusterDisplay.verticalSteps)
-
-    fun saveClusterSmallWindowMarkerVerticalStep(context: Context, step: Int) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .putInt(KEY_CLUSTER_SMALL_WINDOW_MARKER_Y, step.coerceIn(CarPlayClusterDisplay.verticalSteps)).apply()
-    }
-
-    // Cluster mapping has its own key; never reuse the main display mapping at the same resolution.
-    fun loadClusterSafeAreaRect(context: Context): SafeAreaRect? =
-        SafeAreaCodec.decode(context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getString("cluster_safe_area_1920x720", null))?.clampTo(1920, 720)
-
-    fun saveClusterSafeAreaRect(context: Context, rect: SafeAreaRect) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .putString("cluster_safe_area_1920x720", SafeAreaCodec.encode(rect.clampTo(1920, 720))).apply()
-    }
-
-    fun clearClusterSafeAreaRect(context: Context) {
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .remove("cluster_safe_area_1920x720").apply()
     }
 
     fun loadRightHandDrive(context: Context): Boolean =

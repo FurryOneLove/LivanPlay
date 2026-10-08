@@ -2,8 +2,6 @@ package com.shilapi.xcertplay
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
 import android.graphics.drawable.ColorDrawable
 import android.os.Looper
 import android.view.Surface
@@ -277,7 +275,6 @@ class AdaptiveSettingsUiTest {
     @Test
     @Config(shadows = [HotspotSearchProbe::class])
     fun hotspotSearchIndexesItsAsyncCardWithoutStartingAnAdbProbe() {
-        installBydSettingsPackage()
         AirPlayPersistence.saveWirelessHotspotMode(context, WirelessHotspotMode.MANUAL)
         HotspotSearchProbe.workers.clear()
         HotspotSearchProbe.entered = CountDownLatch(1)
@@ -307,8 +304,7 @@ class AdaptiveSettingsUiTest {
 
     @Test
     @Config(shadows = [HotspotSearchProbe::class])
-    fun hotspotSearchKeepsTheBydAndCarHotspotAudienceGates() {
-        installBydSettingsPackage()
+    fun hotspotSearchOffersTheCardOnlyToCarHotspotUsers() {
         AirPlayPersistence.saveWirelessHotspotMode(context, WirelessHotspotMode.EXISTING_WIFI)
         HotspotSearchProbe.workers.clear()
         HotspotSearchProbe.entered = CountDownLatch(1)
@@ -319,8 +315,7 @@ class AdaptiveSettingsUiTest {
 
         assertFalse(index().any { it.title == title })
         AirPlayPersistence.saveWirelessHotspotMode(context, WirelessHotspotMode.MANUAL)
-        shadowOf(context.packageManager).removePackage("com.byd.carsettings")
-        assertFalse(index().any { it.title == title })
+        assertTrue(index().any { it.title == title })
         assertTrue(HotspotSearchProbe.workers.isEmpty())
     }
 
@@ -473,8 +468,8 @@ class AdaptiveSettingsUiTest {
             .performClick()
 
         assertTrue(texts(screen).any { it.text == screen.getString(R.string.settings_advanced_caution_title) })
-        assertTrue(texts(screen).any { it.text == screen.getString(R.string.carplay_map_on_instrument_cluster_experimental) })
-        assertTrue(texts(screen).any { it.text == screen.getString(R.string.advanced_vehicle_data) })
+        assertTrue(texts(screen).any { it.text == screen.getString(R.string.settings_experimental_display) })
+        assertTrue(texts(screen).any { it.text == screen.getString(R.string.settings_advanced_media) })
         assertFalse(texts(screen).any { it.text == screen.getString(R.string.automatic_connection) })
         assertFalse(texts(screen).any { it.text == screen.getString(R.string.display_and_performance) })
         assertFalse(texts(screen).any { it.text == screen.getString(R.string.audio_routing) })
@@ -711,16 +706,6 @@ class AdaptiveSettingsUiTest {
         assertSame(diagnostics.parent, advanced.parent)
         val card = diagnostics.parent as View
         assertEquals(Math.round(18 * screen.resources.displayMetrics.density), (card.layoutParams as LinearLayout.LayoutParams).bottomMargin)
-    }
-
-    private fun installBydSettingsPackage() {
-        shadowOf(context.packageManager).installPackage(PackageInfo().apply {
-            packageName = "com.byd.carsettings"
-            applicationInfo = ApplicationInfo().apply {
-                packageName = "com.byd.carsettings"
-                flags = ApplicationInfo.FLAG_SYSTEM
-            }
-        })
     }
 
     @Implements(CarHotspotSetup::class, isInAndroidSdk = false)
