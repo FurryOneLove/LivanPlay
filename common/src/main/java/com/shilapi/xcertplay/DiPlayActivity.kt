@@ -354,9 +354,15 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
         interfaceOverride = next
         return false
     }
+    private fun overlayPermissionIntent() =
+        Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+
+    /** Android 11+ hides other packages from this query, so a missing screen is only certain before it. */
+    private fun hasSettingsScreen(intent: Intent): Boolean =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.R || intent.resolveActivity(packageManager) != null
+
     private fun openOverlayPermission() {
-        val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
-        if (runCatching { startActivity(intent) }.isFailure) {
+        if (runCatching { startActivity(overlayPermissionIntent()) }.isFailure) {
             android.widget.Toast.makeText(this, R.string.center_map_no_permission_screen, android.widget.Toast.LENGTH_LONG).show()
         }
     }
@@ -2304,9 +2310,12 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
             .setPositiveButton(getString(R.string.btn_auto_apply_permissions)) { _, _ ->
                 autoApplyPermissions()
             }
-            .setNeutralButton(getString(R.string.btn_open_accessibility_setting)) { _, _ ->
-                if (!UsbAutoConfirmService.openSettings(this)) {
-                    toast(getString(R.string.wheel_keys_no_settings))
+            .apply {
+                if (!hasSettingsScreen(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))) return@apply
+                setNeutralButton(getString(R.string.btn_open_accessibility_setting)) { _, _ ->
+                    if (!UsbAutoConfirmService.openSettings(this@DiPlayActivity)) {
+                        toast(getString(R.string.wheel_keys_no_settings))
+                    }
                 }
             }
             .setNegativeButton(getString(R.string.cancel)) { _, _ ->
@@ -2362,6 +2371,8 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
                     val reason = when (result.access) {
                         LocalAdb.Access.NOT_APPROVED -> getString(R.string.auto_grant_confirm_msg)
                         LocalAdb.Access.UNSUPPORTED -> getString(R.string.adb_pairing_only)
+                        LocalAdb.Access.UNREACHABLE ->
+                            "${getString(R.string.adb_off)}\n\n${getString(R.string.auto_grant_incomplete)}"
                         else -> getString(R.string.auto_grant_incomplete)
                     }
                     showManualPermissionDialog(reason)
@@ -2374,37 +2385,52 @@ class DiPlayActivity : ComponentActivity(), AppAppearanceOwner {
         val body = column().apply { setPadding(dp(20), dp(10), dp(20), dp(10)) }
         body.addView(label(reason, 15, MUTED).apply { setPadding(0, 0, 0, dp(12)) })
 
-        val autoConfirmOn = UsbPermissionSetup.Permission.ACCESSIBILITY.granted(this)
-        body.addView(button(if (autoConfirmOn) getString(R.string.usb_auto_confirm_status_on) else getString(R.string.btn_open_accessibility_setting), false) {
-            if (!UsbAutoConfirmService.openSettings(this)) toast(getString(R.string.wheel_keys_no_settings))
-        }, matchButton(0, 56))
+        // Offer a system screen only where the firmware has one: ECARX IHU601/IHU602 ship neither.
+        val snapshot = UsbPermissionSetup.snapshot(this)
+        var screenMissing = false
+        if (snapshot[UsbPermissionSetup.Permission.ACCESSIBILITY] == false) {
+            if (hasSettingsScreen(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))) {
+                body.addView(button(getString(R.string.btn_open_accessibility_setting), false) {
+                    if (!UsbAutoConfirmService.openSettings(this)) toast(getString(R.string.wheel_keys_no_settings))
+                }, matchButton(0, 56))
+            } else screenMissing = true
+        }
+        if (snapshot[UsbPermissionSetup.Permission.OVERLAY] == false) {
+            if (hasSettingsScreen(overlayPermissionIntent())) {
+                body.addView(button(getString(R.string.btn_open_overlay_setting), false) {
+                    openOverlayPermission()
+                }, matchButton(10, 56))
+            } else screenMissing = true
+        }
+        if (screenMissing) {
+            body.addView(label(getString(R.string.center_map_no_permission_screen), 14, WARNING).apply {
+                setPadding(0, 0, 0, dp(12))
+            })
+        }
 
-        val overlayOn = Settings.canDrawOverlays(this)
-        body.addView(button(if (overlayOn) getString(R.string.center_map_overlay_allowed) else getString(R.string.btn_open_overlay_setting), false) {
-            openOverlayPermission()
-        }, matchButton(10, 56))
-
-        UsbPermissionSetup.snapshot(this).forEach { (permission, granted) ->
+        snapshot.forEach { (permission, granted) ->
             val title = getString(when (permission) {
                 UsbPermissionSetup.Permission.ACCESSIBILITY -> R.string.usb_auto_confirm_title
                 UsbPermissionSetup.Permission.OVERLAY -> R.string.btn_open_overlay_setting
             })
             body.addView(label("$title: ${getString(if (granted) R.string.permission_enabled_ready else R.string.permission_not_enabled)}", 14, if (granted) MUTED else WARNING))
         }
-        val adbCmd = UsbPermissionSetup.manualCommand(packageName)
-        body.addView(label(getString(R.string.manual_grant_cmd_hint), 14, MUTED).apply { setPadding(0, dp(12), 0, dp(6)) })
-        body.addView(label(adbCmd, 13, TEXT).apply {
-            typeface = Typeface.MONOSPACE
-            setTextIsSelectable(true)
-            setPadding(dp(8), dp(8), dp(8), dp(8))
-            setBackgroundColor(BUTTON)
-        })
-        body.addView(button(getString(R.string.copy_command), false) {
-            getSystemService(android.content.ClipboardManager::class.java).setPrimaryClip(
-                android.content.ClipData.newPlainText("DiPlay ADB Command", adbCmd)
-            )
-            toast(getString(R.string.copied_to_the_car_clipboard_run_the_command_on_your_comput))
-        }, matchButton(8, 50))
+        val adbCmd = UsbPermissionSetup.manualCommands(this).joinToString("\n")
+        if (adbCmd.isNotEmpty()) {
+            body.addView(label(getString(R.string.manual_grant_cmd_hint), 14, MUTED).apply { setPadding(0, dp(12), 0, dp(6)) })
+            body.addView(label(adbCmd, 13, TEXT).apply {
+                typeface = Typeface.MONOSPACE
+                setTextIsSelectable(true)
+                setPadding(dp(8), dp(8), dp(8), dp(8))
+                setBackgroundColor(BUTTON)
+            })
+            body.addView(button(getString(R.string.copy_command), false) {
+                getSystemService(android.content.ClipboardManager::class.java).setPrimaryClip(
+                    android.content.ClipData.newPlainText("DiPlay ADB Command", adbCmd)
+                )
+                toast(getString(R.string.copied_to_the_car_clipboard_run_the_command_on_your_comput))
+            }, matchButton(8, 50))
+        }
 
         appDialogBuilder()
             .setTitle(getString(R.string.permissions_and_connection_help))

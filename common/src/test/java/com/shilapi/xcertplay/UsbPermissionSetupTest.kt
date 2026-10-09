@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.os.Looper
 import android.provider.Settings
 import com.shilapi.xcertplay.adb.LocalAdb
+import com.shilapi.xcertplay.host.R
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.CopyOnWriteArrayList
@@ -136,6 +137,56 @@ class UsbPermissionSetupTest {
         val script = shellFixture("other.package/.Service") +
             "\nadb() { shift; eval \"\$1\"; }; $command; printf '%s' \"\$saved\""
         assertEquals("other.package/.Service:$target", runShell(script).trim())
+    }
+
+    @Test fun manualCommandsAreShortLiteralLinesForMissingPermissionsOnly() {
+        val target = "${context.packageName}/com.shilapi.xcertplay.UsbAutoConfirmService"
+        assertEquals(listOf(
+            "adb shell settings put secure enabled_accessibility_services $target",
+            "adb shell settings put secure accessibility_enabled 1",
+            "adb shell appops set ${context.packageName} SYSTEM_ALERT_WINDOW allow",
+        ), UsbPermissionSetup.manualCommands(context))
+
+        ShadowSettings.setCanDrawOverlays(true)
+        Settings.Secure.putString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+            "other.package/.Service")
+        assertEquals(listOf(
+            "adb shell settings put secure enabled_accessibility_services other.package/.Service:$target",
+            "adb shell settings put secure accessibility_enabled 1",
+        ), UsbPermissionSetup.manualCommands(context))
+
+        // Listed already, only the global switch is off: the list is repeated unchanged.
+        Settings.Secure.putString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, target)
+        assertEquals("adb shell settings put secure enabled_accessibility_services $target",
+            UsbPermissionSetup.manualCommands(context).first())
+
+        Settings.Secure.putInt(context.contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED, 1)
+        assertTrue(UsbPermissionSetup.manualCommands(context).isEmpty())
+    }
+
+    @Test fun manualCommandsKeepTheDeviceShellScriptForAListThatIsUnsafeToRetype() {
+        Settings.Secure.putString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
+            "other.package/.Outer\$Inner")
+        val command = UsbPermissionSetup.manualCommands(context).first()
+        assertTrue(command.contains("settings get secure enabled_accessibility_services"))
+        assertFalse(command.contains("Outer"))
+    }
+
+    @Test fun manualDialogOffersNoButtonForASettingsScreenTheFirmwareLacks() {
+        val activity = Robolectric.buildActivity(DiPlayActivity::class.java).get()
+        activity.setTheme(android.R.style.Theme_Material_NoActionBar)
+        DiPlayActivity::class.java.getDeclaredMethod("showManualPermissionDialog", String::class.java)
+            .apply { isAccessible = true }.invoke(activity, "reason")
+        val texts = mutableListOf<String>()
+        fun collect(view: android.view.View) {
+            if (view is android.widget.TextView) texts += view.text.toString()
+            if (view is android.view.ViewGroup) for (i in 0 until view.childCount) collect(view.getChildAt(i))
+        }
+        collect(ShadowAlertDialog.getLatestAlertDialog().window!!.decorView)
+        assertFalse(context.getString(R.string.btn_open_accessibility_setting) in texts)
+        assertFalse(context.getString(R.string.btn_open_overlay_setting) in texts)
+        assertTrue(context.getString(R.string.center_map_no_permission_screen) in texts)
+        assertTrue(UsbPermissionSetup.manualCommands(context).joinToString("\n") in texts)
     }
 
     @Test fun progressCancelUnblocksWorkerAndSuppressesLateDialogs() = cancelledUiAttempt {

@@ -127,4 +127,34 @@ internal object UsbPermissionSetup {
     fun manualCommand(packageName: String): String = Permission.entries.joinToString(" && ") {
         "adb shell ${quote(command(it, packageName))}"
     }
+
+    private val PLAIN_SERVICE_LIST = Regex("[A-Za-z0-9_./:]*")
+
+    /**
+     * One short command per line for the permissions still missing. The driver retypes them from the
+     * car's screen, so they carry no shell logic and work in any computer shell. The service list is
+     * read here; a list that cannot be read or typed safely keeps the device-shell script.
+     */
+    fun manualCommands(context: Context): List<String> {
+        val pkg = context.packageName
+        return Permission.entries.filterNot { it.granted(context) }.flatMap { permission ->
+            when (permission) {
+                Permission.OVERLAY -> listOf("adb shell appops set $pkg SYSTEM_ALERT_WINDOW allow")
+                Permission.ACCESSIBILITY -> {
+                    val current = runCatching {
+                        Settings.Secure.getString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES).orEmpty()
+                    }.getOrNull()
+                    if (current == null || !PLAIN_SERVICE_LIST.matches(current)) {
+                        return@flatMap listOf("adb shell ${quote(command(permission, pkg))}")
+                    }
+                    val services = current.split(':').filter { it.isNotBlank() }.toMutableList()
+                    if (!UsbAutoConfirmService.isEnabled(context)) services += "$pkg/${UsbAutoConfirmService::class.java.name}"
+                    listOf(
+                        "adb shell settings put secure enabled_accessibility_services ${services.joinToString(":")}",
+                        "adb shell settings put secure accessibility_enabled 1",
+                    )
+                }
+            }
+        }
+    }
 }
