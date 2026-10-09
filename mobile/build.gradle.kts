@@ -32,8 +32,8 @@ android {
         minSdk = 25
         targetSdk = 37
         // LivanPlay numbering; the DiPlay release this tree is based on follows the dash.
-        versionCode = 1
-        versionName = "0.1.0-diplay0.2.15"
+        versionCode = 2
+        versionName = "0.1.1-diplay0.2.15"
 
     }
 
